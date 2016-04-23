@@ -1,0 +1,17 @@
+{
+    "name": "assouan/routing",
+    "type": "library",
+    "require": {
+        "php": "^7.0",
+        "psr/http-message": "*",
+        "psr/http-message-implementation": "1.0"
+    },
+    "suggest": {
+        "zendframework/zend-diactoros": "PSR HTTP Message implementations"
+    },
+    "autoload": {
+        "psr-4": {
+            "Routing\\": "src/"
+        }
+    }
+}
