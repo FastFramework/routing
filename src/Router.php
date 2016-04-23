@@ -30,7 +30,7 @@ class Router
 
     /**
      * @param ServerRequest $request
-     * @return Response If success, return a Response
+     * @return Response
      */
     function match(ServerRequest $request)
     {
@@ -43,7 +43,7 @@ class Router
 
     /**
      * @param ServerRequest $request
-     * @return Response If success, return a Response
+     * @return Response
      */
     function matches(ServerRequest $request)
     {
