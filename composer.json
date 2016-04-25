@@ -6,6 +6,9 @@
         "psr/http-message": "*",
         "psr/http-message-implementation": "*"
     },
+    "require-dev": {
+        "zendframework/zend-diactoros": "*"
+    },
     "suggest": {
         "zendframework/zend-diactoros": "PSR HTTP Message implementations"
     },

@@ -5,66 +5,70 @@ namespace Routing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as ServerRequest;
 
-class Route implements RouteInterface
+class Route
 {
     /** @var string */
-    protected $regex;
+    protected $pattern;
 
-    /** @var callable */
-    protected $callable;
+    /** @var callable[] */
+    protected $callables;
 
     /** @var array */
-    protected $options;
+    protected $options = [];
 
     /**
      * Route constructor.
-     * @param string $regex
+     * @param string $pattern
      * @param callable $callable
-     * @param array $options
+     * @param callable[] ...$callables
      */
-    public function __construct(string $regex, callable $callable, array $options = [])
+    public function __construct(string $pattern, callable $callable, callable ...$callables)
     {
-        $this->setRegex($regex);
-        $this->setCallable($callable);
-        $this->setOptions($options);
+        array_unshift($callables, $callable);
+
+        $this->setPattern($pattern);
+        $this->setCallables(...$callables);
     }
 
     /**
      * @return string
      */
-    public function getRegex() : string
+    public function getPattern() : string
     {
-        return $this->regex;
+        return $this->pattern;
     }
 
     /**
-     * @param string $regex
+     * @param string $pattern
      * @return self
      */
-    public function setRegex(string $regex) : self
+    public function setPattern(string $pattern) : self
     {
-        $regex = preg_replace('{/{2,}}', '/', $regex);
-        $regex = trim($regex, '/');
+        $pattern = preg_replace('{/{2,}}', '/', $pattern);
+        $pattern = trim($pattern, '/');
 
-        $this->regex = $regex;
+        $this->pattern = $pattern;
         return $this;
     }
 
     /**
-     * @return callable
+     * @return array
      */
-    public function getCallable() : callable
+    public function getCallables() : array
     {
-        return $this->callable;
+        return $this->callables;
     }
 
     /**
      * @param callable $callable
+     * @param callable[] ...$callables
      * @return self
      */
-    public function setCallable(callable $callable) : self
+    public function setCallables(callable $callable, callable ...$callables) : self
     {
-        $this->callable = $callable;
+        array_unshift($callables, $callable);
+
+        $this->callables = $callables;
         return $this;
     }
 
@@ -104,34 +108,5 @@ class Route implements RouteInterface
     {
         $this->options[$key] = $value;
         return $this;
-    }
-
-    /**
-     * @param ServerRequest $request
-     * @return Response
-     */
-    public function match(ServerRequest $request)
-    {
-        // TODO: check uri in Router (and not in route)
-        $path = preg_replace('{/{2,}}', '/', $request->getUri()->getPath());
-        //$path = $request->getUri()->getQuery(); // TODO:TEST:DEBUG
-        $path = trim($path, '/');
-        $path = urldecode($path); // TODO: debug temporaire
-
-        // Regex
-        if (!preg_match('{^'.$this->regex.'$}i', $path, $attributes))
-            return false;
-
-        foreach (array_filter($attributes, 'is_string', ARRAY_FILTER_USE_KEY) as $ak => $av)
-            $request = $request->withAttribute($ak, $av);
-
-        // Options
-        foreach ($this->getOptions() as $key => $value)
-            switch($key)
-            {
-                case 'method': if (!in_array($request->getMethod(), explode('|', $value))) return false;
-            }
-
-        return call_user_func($this->callable, $request, ...array_filter($attributes, 'is_int', ARRAY_FILTER_USE_KEY)); // TODO: delete key 0
     }
 }
