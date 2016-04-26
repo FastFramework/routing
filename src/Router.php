@@ -34,7 +34,7 @@ class Router
      * @param callable[] ...$callables
      * @return Route
      */
-    function map(string $pattern, callable $callable, callable ...$callables) : Route
+    function map(string $pattern, $callable, ...$callables) : Route
     {
         return $this->collection[] = new Route($pattern, $callable, ...$callables);
     }

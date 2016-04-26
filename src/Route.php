@@ -22,7 +22,7 @@ class Route
      * @param callable $callable
      * @param callable[] ...$callables
      */
-    public function __construct(string $pattern, callable $callable, callable ...$callables)
+    public function __construct(string $pattern, $callable, ...$callables)
     {
         array_unshift($callables, $callable);
 
