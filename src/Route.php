@@ -64,7 +64,7 @@ class Route
      * @param callable[] ...$callables
      * @return self
      */
-    public function setCallables(callable $callable, callable ...$callables) : self
+    public function setCallables($callable, ...$callables) : self
     {
         array_unshift($callables, $callable);
 
