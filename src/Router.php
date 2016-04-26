@@ -38,6 +38,39 @@ class Router
     {
         return $this->collection[] = new Route($pattern, $callable, ...$callables);
     }
+    
+    public function __invoke(Request $request, Response $response, callable $next)
+    {
+        $path = preg_replace('{/{2,}}', '/', $request->getUri()->getPath());
+        $path = trim($path, '/');
+        $path = urldecode($path); // TODO: debug temporaire
+
+        foreach ($this->collection as $route)
+        {
+            // Pattern
+            if (!preg_match('{^'.$route->getPattern().'$}i', $path, $attributes))
+                continue;
+
+            // Options
+            foreach ($route->getOptions() as $key => $value)
+                switch($key)
+                {
+                    case 'method': if (!in_array($request->getMethod(), explode('|', $value))) continue 3;
+                }
+
+            // Todo: add number key in attributes ??? See
+            // Attributes
+            foreach (array_filter($attributes, 'is_string', ARRAY_FILTER_USE_KEY) as $ak => $av)
+                $request = $request->withAttribute($ak, $av);
+            
+            return $next($request, $response, ...$route->getCallables() );
+        }
+
+        // Error 404
+        return $next($request, $response);
+    }
+
+    // @todo: OLD SYSTEM, delete him later
 
     /**
      * @param Request $request
@@ -46,7 +79,6 @@ class Router
      */
     function dispatch(Request $request, Response $response)
     {
-        // TODO: check uri in Router (and not in route)
         $path = preg_replace('{/{2,}}', '/', $request->getUri()->getPath());
         $path = $request->getUri()->getQuery(); // TODO:TEST:DEBUG
         $path = trim($path, '/');
